@@ -1,6 +1,5 @@
 import base64
 import my_secrets
-import requests
 import tweepy
 
 #for posting tweets
