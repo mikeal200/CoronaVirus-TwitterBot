@@ -28,14 +28,14 @@ while True:
                 "Recoveries Today: " + "{:,}".format(new_recovered))
 
 
-    #request to corona-api
+    #request to api.covid19api.com
     LAST_SEEN = "last_seen.txt"
     PREV_CONFIRMED = "previous_confirmed.txt"
 
-    request = requests.get('http://corona-api.com/countries/US', timeout=2.50)
+    request = requests.get('https://api.covid19api.com/summary', timeout=2.50)
     parsed = json.loads(request.content.decode('UTF-8'))
 
-    date = parsed['data']['timeline'][0]['date']
+    date = parsed['countries']['timeline'][0]['date']
 
     if read_last_seen(LAST_SEEN) != date:
         store_last_seen(LAST_SEEN, date)
