@@ -2,7 +2,7 @@ import requests
 import json
 import time
 from oauth import api
-from read_write import read_last_seen, store_last_seen, store_prev_confirmed, read_prev_confirmed
+from read_write import read_last_seen, store_last_seen
 
 while True:
     class Post:
@@ -21,24 +21,20 @@ while True:
                 "Total Recoveries: " + "{:,}".format(recovered) + "\n"\
                 "New Confirmed Cases: " + "{:,}".format(new_confirmed) + "\n"\
                 "Deaths Today: " + "{:,}".format(new_deaths) + "\n"\
-                "Recoveries Today: " + "{:,}".format(new_recovered))
+                "Recoveries Today: " + "{:,}".format(new_recovered)) + "\n\n"\
+                "#coronavirus #covid19"
 
 
     #request to api.covid19api.com
     LAST_SEEN = "last_seen.txt"
-    PREV_CONFIRMED = "previous_confirmed.txt"
-
-    #request = requests.get('https://api.covid19api.com/summary', timeout=2.50)
-    #parsed = json.loads(request.content.decode('UTF-8'))
 
     url = 'https://api.covid19api.com/summary'
-    r = requests.get(url)
+    response = requests.request("GET", url)
 
-    if 'json' in r.headers.get('Content-Type'):
-        parsed = r.json()
+    if response.status_code == 200:
+        parsed = response.json()
     else:
-        print('Response content is not in JSON format.')
-        js = 'spam'
+        print(response.status_code)
 
     date = parsed['Countries'][177]['Date']
     date = str(date).split('T', 1)[0]
@@ -55,7 +51,6 @@ while True:
 
         post = Post(confirmed, deaths, recovered, new_confirmed, new_deaths, new_recovered)
         #twitter api request
-        #api.update_status(post.postFormat())
-        print(post.postFormat())
+        api.update_status(post.postFormat())
 
-    #time.sleep(86400)
+    time.sleep(3600)
