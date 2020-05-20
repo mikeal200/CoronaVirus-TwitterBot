@@ -17,7 +17,7 @@ while True:
         def postFormat(self):
             return format("US Covid-19 Daily Statistics\n\n"\
                 "Confirmed Cases: " + "{:,}".format(confirmed) + "\n"\
-                "Total Deaths: " + "{:,}".format(active) + "\n"\
+                "Total Deaths: " + "{:,}".format(deaths) + "\n"\
                 "Total Recoveries: " + "{:,}".format(recovered) + "\n"\
                 "New Confirmed Cases: " + "{:,}".format(new_confirmed) + "\n"\
                 "Deaths Today: " + "{:,}".format(new_deaths) + "\n"\
@@ -28,8 +28,17 @@ while True:
     LAST_SEEN = "last_seen.txt"
     PREV_CONFIRMED = "previous_confirmed.txt"
 
-    request = requests.get('https://api.covid19api.com/summary', timeout=2.50)
-    parsed = json.loads(request.content.decode('UTF-8'))
+    #request = requests.get('https://api.covid19api.com/summary', timeout=2.50)
+    #parsed = json.loads(request.content.decode('UTF-8'))
+
+    url = 'https://api.covid19api.com/summary'
+    r = requests.get(url)
+
+    if 'json' in r.headers.get('Content-Type'):
+        parsed = r.json()
+    else:
+        print('Response content is not in JSON format.')
+        js = 'spam'
 
     date = parsed['Countries'][177]['Date']
     date = str(date).split('T', 1)[0]
@@ -37,15 +46,12 @@ while True:
     if read_last_seen(LAST_SEEN) != date:
         store_last_seen(LAST_SEEN, date)
         print(read_last_seen(LAST_SEEN) + " has been added to last_seen.txt")
-        confirmed = parsed['Countries']['timeline'][0]['confirmed']
-        deaths = parsed['data']['timeline'][0]['deaths']
-        #new confirmed was giving innacurate statistics so i will save the previous days confirmed cases and it will subtracted by the current days confirmed cases
-        #new_confirmed = parsed['data']['timeline'][0]['new_confirmed']
-        new_deaths = parsed['data']['timeline'][0]['new_deaths']
-        new_recovered = parsed['data']['timeline'][0]['new_recovered']
-        recovered = parsed['data']['timeline'][0]['recovered']
-        previous_confirmed = read_prev_confirmed(PREV_CONFIRMED)
-        new_confirmed = 0
+        confirmed = parsed['Countries'][177]['TotalConfirmed']
+        deaths = parsed['Countries'][177]['TotalDeaths']
+        new_confirmed = parsed['Countries'][177]['NewConfirmed']
+        new_deaths = parsed['Countries'][177]['NewDeaths']
+        new_recovered = parsed['Countries'][177]['NewRecovered']
+        recovered = parsed['Countries'][177]['TotalRecovered']
 
         post = Post(confirmed, deaths, recovered, new_confirmed, new_deaths, new_recovered)
         #twitter api request
